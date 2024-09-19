@@ -1,0 +1,155 @@
+import React, { useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import { useHistory  } from 'react-router-dom';
+import axios from 'axios';
+//import '../../assets/sass/pages/login/classic/login-6.scss';
+
+// Set up Axios defaults
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
+
+const client = axios.create({
+    baseURL: "http://127.0.0.1:8000",
+});
+
+function LoginOrRegister() {
+    const [isRegistration, setIsRegistration] = useState(false);
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const navigate = useHistory ();
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            await client.post("/api/login", { email, password });
+            navigate('/feeds');
+        } catch (error) {
+            console.error('Login error:', error);
+        }
+    };
+
+    const handleRegistration = async (e) => {
+        e.preventDefault();
+        try {
+            await client.post("/api/register", { email, username, password });
+            await client.post("/api/login", { email, password });
+            navigate('/feeds'); // Redirect to /feeds on successful registration and login
+        } catch (error) {
+            console.error('Registration error:', error);
+        }
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        try {
+            await client.post("/api/logout", {}, { withCredentials: true });
+            navigate('/auth'); // Redirect to /auth on successful logout
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
+
+    return (
+        <div className="d-flex flex-column flex-root">
+            <div className="login login-6 login-signin-on login-signin-on d-flex flex-column-fluid" id="kt_login">
+                <div className="d-flex flex-column flex-lg-row flex-row-fluid text-center">
+                    <div className="d-flex w-100 flex-center p-15">
+                        <div className="login-wrapper">
+                            <div className="text-dark-75">
+                                <a href="/">
+                                    {/* img */}
+                                </a>
+                                <h3 className="mb-8 mt-22 font-weight-bold">JOIN OUR GREAT COMMUNITY</h3>
+                                <p className="mb-15 text-muted font-weight-bold">The ultimate Bootstrap & Angular 6 admin theme framework for next generation web apps.</p>
+                                <Button onClick={() => setIsRegistration(true)} className="btn btn-outline-primary btn-pill py-4 px-9 font-weight-bold">
+                                    Get An Account
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="login-divider">
+                        <div></div>
+                    </div>
+                    <div className="d-flex w-100 flex-center p-15 position-relative overflow-hidden">
+                        <div className="login-wrapper">
+                            {isRegistration ? (
+                                <div className="login-signup">
+                                    <div className="text-center mb-10 mb-lg-20">
+                                        <h3>Sign Up</h3>
+                                        <p className="text-muted font-weight-bold">Enter your details to create your account</p>
+                                    </div>
+                                    <Form onSubmit={handleRegistration}>
+                                        <Form.Group className="mb-3" controlId="formBasicFullname">
+                                            <Form.Label>Fullname</Form.Label>
+                                            <Form.Control type="text" placeholder="Fullname" value={username} onChange={(e) => setUsername(e.target.value)} />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                                            <Form.Label>Email address</Form.Label>
+                                            <Form.Control type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3" controlId="formBasicPassword">
+                                            <Form.Label>Password</Form.Label>
+                                            <Form.Control type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
+                                            <Form.Label>Confirm Password</Form.Label>
+                                            <Form.Control type="password" placeholder="Confirm Password" />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3">
+                                            <Form.Check type="checkbox" label="I Agree to the terms and conditions" />
+                                        </Form.Group>
+                                        <div className="d-flex flex-wrap flex-center">
+                                            <Button variant="primary" type="submit" className="btn btn-primary btn-pill font-weight-bold px-9 py-4 my-3 mx-2">Submit</Button>
+                                            <Button onClick={() => setIsRegistration(false)} variant="outline-primary" className="btn btn-outline-primary btn-pill font-weight-bold px-9 py-4 my-3 mx-2">Cancel</Button>
+                                        </div>
+                                    </Form>
+                                </div>
+                            ) : (
+                                <div className="login-signin">
+                                    <div className="text-center mb-10 mb-lg-20">
+                                        <h2 className="font-weight-bold">Sign In</h2>
+                                        <p className="text-muted font-weight-bold">Enter your username and password</p>
+                                    </div>
+                                    <Form onSubmit={handleLogin}>
+                                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                                            <Form.Label>Email address</Form.Label>
+                                            <Form.Control type="email" placeholder="Enter email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3" controlId="formBasicPassword">
+                                            <Form.Label>Password</Form.Label>
+                                            <Form.Control type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3" controlId="formBasicCheckbox">
+                                            <Form.Check type="checkbox" label="Check me out" />
+                                        </Form.Group>
+                                        <Button variant="primary" type="submit">Submit</Button>
+                                    </Form>
+                                </div>
+                            )}
+                            <div className="login-forgot">
+                                <div className="text-center mb-10 mb-lg-20">
+                                    <h3>Forgotten Password?</h3>
+                                    <p className="text-muted font-weight-bold">Enter your email to reset your password</p>
+                                </div>
+                                <Form id="kt_login_forgot_form">
+                                    <Form.Group className="form-group py-2 m-0 border-bottom">
+                                        <Form.Control type="text" placeholder="Email" name="email" autoComplete="off" />
+                                    </Form.Group>
+                                    <div className="form-group d-flex flex-wrap flex-center mt-10">
+                                        <Button id="kt_login_forgot_submit" className="btn btn-primary btn-pill font-weight-bold px-9 py-4 my-3 mx-2">Submit</Button>
+                                        <Button id="kt_login_forgot_cancel" className="btn btn-outline-primary btn-pill font-weight-bold px-9 py-4 my-3 mx-2">Cancel</Button>
+                                    </div>
+                                </Form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default LoginOrRegister;
